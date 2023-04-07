@@ -1,4 +1,4 @@
-# fly.toml file generated for sparkling-pond-1875 on 2023-04-06T22:00:55-03:00
+# fly.toml file generated for sparkling-pond-1875 on 2023-04-06T22:02:32-03:00
 
 app = "sparkling-pond-1875"
 kill_signal = "SIGINT"

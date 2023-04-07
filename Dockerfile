@@ -1,38 +1,27 @@
-FROM ekidd/rust-musl-builder:stable as builder
+# Use the Rust image from Docker Hub
+FROM rust:latest as build
 
-RUN USER=root cargo new --bin rust-docker-web
-WORKDIR ./rust-docker-web
-COPY ./Cargo.lock ./Cargo.lock
-COPY ./Cargo.toml ./Cargo.toml
+# Create a new directory for our project
+WORKDIR /usr/src/my-http-server
+
+# Copy the Cargo.toml and Cargo.lock files to the container
+COPY Cargo.toml Cargo.lock ./
+
+# Build the dependencies to cache them
 RUN cargo build --release
-RUN rm src/*.rs
 
-ADD . ./
+# Copy the rest of the source code to the container
+COPY src ./src
 
+# Build the server in release mode
 RUN cargo build --release
 
+# Create a new image with only the necessary files
+FROM debian:buster-slim
+COPY --from=build /usr/src/my-http-server/target/release/my-http-server /usr/local/bin/my-http-server
 
-FROM alpine:latest
+# Expose the port on which the server will listen
+EXPOSE 8080
 
-ARG APP=/usr/src/app
-
-EXPOSE 8000
-
-ENV TZ=Etc/UTC \
-  APP_USER=appuser
-
-RUN addgroup -S $APP_USER \
-  && adduser -S -g $APP_USER $APP_USER
-
-RUN apk update \
-  && apk add --no-cache ca-certificates tzdata \
-  && rm -rf /var/cache/apk/*
-
-COPY --from=builder /home/rust/src/rust-docker-web/target/x86_64-unknown-linux-musl/release/rust-docker-web ${APP}/rust-docker-web
-
-RUN chown -R $APP_USER:$APP_USER ${APP}
-
-USER $APP_USER
-WORKDIR ${APP}
-
-CMD ["./rust-docker-web"]
+# Start the server
+CMD ["my-http-server"]
