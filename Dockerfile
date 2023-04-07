@@ -1,33 +1,39 @@
-FROM rust:latest as builder
-
-# Make a fake Rust app to keep a cached layer of compiled crates
-RUN USER=root cargo new app
-WORKDIR /usr/src/app
-COPY Cargo.toml Cargo.lock content ./
-
-# Will build all dependent crates in release mode
-RUN --mount=type=cache,target=/usr/local/cargo/registry \
-  --mount=type=cache,target=/usr/src/app/target \
-  cargo build --release
-
-# Copy the rest
+FROM rust:1.61.0
+WORKDIR /usr/src/myapp
 COPY . .
+RUN cargo install --path .
+CMD ["myapp"]
 
-# Build (install) the actual binaries
-RUN --mount=type=cache,target=/usr/local/cargo/registry \
-  --mount=type=cache,target=/usr/src/app/target \
-  cargo install --path .
+# FROM rust:latest as builder
 
-# Runtime image
-FROM debian:bullseye-slim 
+# # Make a fake Rust app to keep a cached layer of compiled crates
+# RUN USER=root cargo new app
+# WORKDIR /usr/src/app
+# COPY Cargo.toml Cargo.lock content ./
 
-# Run as "app" user
-RUN useradd -ms /bin/bash app
+# # Will build all dependent crates in release mode
+# RUN --mount=type=cache,target=/usr/local/cargo/registry \
+#   --mount=type=cache,target=/usr/src/app/target \
+#   cargo build --release
 
-USER app
-WORKDIR /app
+# # Copy the rest
+# COPY . .
 
-# Get compiled binaries from builder's cargo install directory
-COPY --from=builder /usr/local/cargo/bin/hello /app/hello
+# # Build (install) the actual binaries
+# RUN --mount=type=cache,target=/usr/local/cargo/registry \
+#   --mount=type=cache,target=/usr/src/app/target \
+#   cargo install --path .
 
-# No CMD or ENTRYPOINT, see fly.toml with `cmd` override.
+# # Runtime image
+# FROM debian:bullseye-slim 
+
+# # Run as "app" user
+# RUN useradd -ms /bin/bash app
+
+# USER app
+# WORKDIR /app
+
+# # Get compiled binaries from builder's cargo install directory
+# COPY --from=builder /usr/local/cargo/bin/hello /app/hello
+
+# # No CMD or ENTRYPOINT, see fly.toml with `cmd` override.

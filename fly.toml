@@ -1,6 +1,6 @@
-# fly.toml file generated for restless-cloud-5224 on 2023-04-06T21:43:18-03:00
+# fly.toml file generated for restless-cherry-1964 on 2023-04-06T21:46:13-03:00
 
-app = "restless-cloud-5224"
+app = "restless-cherry-1964"
 kill_signal = "SIGINT"
 kill_timeout = 5
 primary_region = "gru"
