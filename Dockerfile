@@ -1,39 +1,39 @@
-FROM rust:1.61.0
-WORKDIR /usr/src/myapp
-COPY . .
-RUN cargo install --path .
-CMD ["myapp"]
+FROM ekidd/rust-musl-builder:stable as builder
 
-# FROM rust:latest as builder
+RUN USER=root cargo new --bin rust-docker-web
+WORKDIR ./rust-docker-web
+COPY ./Cargo.lock ./Cargo.lock
+COPY ./Cargo.toml ./Cargo.toml
+RUN cargo build --release
+RUN rm src/*.rs
 
-# # Make a fake Rust app to keep a cached layer of compiled crates
-# RUN USER=root cargo new app
-# WORKDIR /usr/src/app
-# COPY Cargo.toml Cargo.lock content ./
+ADD . ./
 
-# # Will build all dependent crates in release mode
-# RUN --mount=type=cache,target=/usr/local/cargo/registry \
-#   --mount=type=cache,target=/usr/src/app/target \
-#   cargo build --release
+RUN rm ./target/x86_64-unknown-linux-musl/release/deps/rust_docker_web*
+RUN cargo build --release
 
-# # Copy the rest
-# COPY . .
 
-# # Build (install) the actual binaries
-# RUN --mount=type=cache,target=/usr/local/cargo/registry \
-#   --mount=type=cache,target=/usr/src/app/target \
-#   cargo install --path .
+FROM alpine:latest
 
-# # Runtime image
-# FROM debian:bullseye-slim 
+ARG APP=/usr/src/app
 
-# # Run as "app" user
-# RUN useradd -ms /bin/bash app
+EXPOSE 8000
 
-# USER app
-# WORKDIR /app
+ENV TZ=Etc/UTC \
+  APP_USER=appuser
 
-# # Get compiled binaries from builder's cargo install directory
-# COPY --from=builder /usr/local/cargo/bin/hello /app/hello
+RUN addgroup -S $APP_USER \
+  && adduser -S -g $APP_USER $APP_USER
 
-# # No CMD or ENTRYPOINT, see fly.toml with `cmd` override.
+RUN apk update \
+  && apk add --no-cache ca-certificates tzdata \
+  && rm -rf /var/cache/apk/*
+
+COPY --from=builder /home/rust/src/rust-docker-web/target/x86_64-unknown-linux-musl/release/rust-docker-web ${APP}/rust-docker-web
+
+RUN chown -R $APP_USER:$APP_USER ${APP}
+
+USER $APP_USER
+WORKDIR ${APP}
+
+CMD ["./rust-docker-web"]
