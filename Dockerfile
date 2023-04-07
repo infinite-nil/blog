@@ -9,7 +9,6 @@ RUN rm src/*.rs
 
 ADD . ./
 
-RUN rm ./target/x86_64-unknown-linux-musl/release/deps/rust_docker_web*
 RUN cargo build --release
 
 
