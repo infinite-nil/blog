@@ -8,7 +8,7 @@ processes = []
 
 [experimental]
   auto_rollback = true
-  cmd = "./hello"
+  cmd = "./blog"
 
 [[services]]
   http_checks = []
