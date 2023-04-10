@@ -100,9 +100,8 @@ fn handle_connection(mut stream: TcpStream) {
 
     println!("HTTP REQUEST >>> {:?}", http_request);
 
-    match http_request.len() {
-        0 => handle_error(&stream),
-        _ => (),
+    if http_request.len() == 0 {
+        return handle_error(&stream);
     }
 
     let content = get_content(http_request);
