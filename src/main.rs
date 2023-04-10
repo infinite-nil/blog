@@ -2,7 +2,7 @@ use std::{
     fmt::Error,
     fs::{self, File},
     io::{prelude::*, BufReader},
-    net::{TcpListener, TcpStream},
+    net::{SocketAddr, TcpListener, TcpStream},
 };
 
 enum Content {
@@ -104,7 +104,9 @@ fn handle_connection(mut stream: TcpStream) {
 }
 
 fn main() {
-    let listener = TcpListener::bind("0.0.0.0:8080").unwrap();
+    let addrs = [SocketAddr::from(([0, 0, 0, 0, 0, 0, 0, 0], 8080))];
+
+    let listener = TcpListener::bind(&addrs[..]).unwrap();
 
     for stream in listener.incoming() {
         let stream = stream.unwrap();
