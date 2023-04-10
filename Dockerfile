@@ -27,10 +27,9 @@ RUN useradd -ms /bin/bash app
 USER app
 WORKDIR /app
 
-# Copy the content folder alongside the bin folder
-COPY ./content /app
 
 # Get compiled binaries from builder's cargo install directory
 COPY --from=builder /usr/local/cargo/bin/blog /app/blog
 
-# No CMD or ENTRYPOINT, see fly.toml with `cmd` override.
+# Copy the content folder alongside the bin folder
+COPY ./content /app/content

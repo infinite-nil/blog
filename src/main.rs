@@ -13,6 +13,8 @@ enum Content {
 fn get_content(req: Vec<String>) -> Result<Content, Error> {
     let req_parts: Vec<&str> = req[0].split(" ").collect();
 
+    println!("{:?}", req_parts);
+
     // Only allow GET requests
     if req_parts[0] != "GET" {
         return Err(Error);
@@ -75,19 +77,6 @@ fn get_content(req: Vec<String>) -> Result<Content, Error> {
     Ok(content)
 }
 
-fn handle_connection(mut stream: TcpStream) {
-    let buf_reader = BufReader::new(&mut stream);
-    let http_request: Vec<_> = buf_reader
-        .lines()
-        .map(|result| result.unwrap())
-        .take_while(|line| !line.is_empty())
-        .collect();
-
-    let response = "HTTP/1.1 200 OK\r\n\r\n";
-
-    stream.write_all(response.as_bytes()).unwrap();
-}
-
 // fn handle_connection(mut stream: TcpStream) {
 //     let buf_reader = BufReader::new(&mut stream);
 //     let http_request: Vec<_> = buf_reader
@@ -96,25 +85,38 @@ fn handle_connection(mut stream: TcpStream) {
 //         .take_while(|line| !line.is_empty())
 //         .collect();
 
-//     let content = get_content(http_request);
+//     let response = "HTTP/1.1 200 OK\r\n\r\n";
 
-//     match content {
-//         Ok(Content::Favicon(header, buffer)) => {
-//             stream.write_all(header.as_bytes()).unwrap();
-//             stream.write_all(buffer.as_slice()).unwrap();
-//             stream.flush().unwrap();
-//         }
-//         Ok(Content::Index(header, content)) => {
-//             stream.write_all(header.as_bytes()).unwrap();
-//             stream.write_all(content.as_bytes()).unwrap();
-//             stream.flush().unwrap();
-//         }
-//         Err(_) => {
-//             let response = "HTTP/1.1 404 NOT FOUND\r\n\r\n";
-//             stream.write_all(response.as_bytes()).unwrap();
-//         }
-//     }
+//     stream.write_all(response.as_bytes()).unwrap();
 // }
+
+fn handle_connection(mut stream: TcpStream) {
+    let buf_reader = BufReader::new(&mut stream);
+    let http_request: Vec<_> = buf_reader
+        .lines()
+        .map(|result| result.unwrap())
+        .take_while(|line| !line.is_empty())
+        .collect();
+
+    let content = get_content(http_request);
+
+    match content {
+        Ok(Content::Favicon(header, buffer)) => {
+            stream.write_all(header.as_bytes()).unwrap();
+            stream.write_all(buffer.as_slice()).unwrap();
+            stream.flush().unwrap();
+        }
+        Ok(Content::Index(header, content)) => {
+            stream.write_all(header.as_bytes()).unwrap();
+            stream.write_all(content.as_bytes()).unwrap();
+            stream.flush().unwrap();
+        }
+        Err(_) => {
+            let response = "HTTP/1.1 404 NOT FOUND\r\n\r\n";
+            stream.write_all(response.as_bytes()).unwrap();
+        }
+    }
+}
 
 fn main() {
     let addrs = [SocketAddr::from(([0, 0, 0, 0, 0, 0, 0, 0], 8080))];
