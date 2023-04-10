@@ -1,6 +1,4 @@
-# fly.toml file generated for holy-dust-8431 on 2023-04-08T17:00:08-03:00
-
-app = "holy-dust-8431"
+app = "joao-alberto-blog"
 kill_signal = "SIGINT"
 kill_timeout = 5
 primary_region = "gru"
@@ -10,6 +8,7 @@ processes = []
 
 [experimental]
   auto_rollback = true
+  cmd = "./hello"
 
 [[services]]
   http_checks = []
