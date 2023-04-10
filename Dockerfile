@@ -3,7 +3,7 @@ FROM rust:latest as builder
 # Make a fake Rust app to keep a cached layer of compiled crates
 RUN USER=root cargo new app
 WORKDIR /usr/src/app
-COPY Cargo.toml Cargo.lock ./content ./
+COPY Cargo.toml Cargo.lock ./
 # Needs at least a main.rs file with a main function
 RUN mkdir src && echo "fn main(){}" > src/main.rs
 # Will build all dependent crates in release mode
@@ -28,7 +28,7 @@ USER app
 WORKDIR /app
 
 # Copy the content folder alongside the bin folder
-COPY --from=builder ./content /app/content
+COPY --from=builder /usr/src/app/content /app/content
 
 # Get compiled binaries from builder's cargo install directory
 COPY --from=builder /usr/local/cargo/bin/blog /app/blog
