@@ -28,6 +28,6 @@ USER blog
 WORKDIR /blog
 
 # Get compiled binaries from builder's cargo install directory
-COPY --from=builder /usr/local/cargo/bin/hello /blog/hello
+COPY --from=builder /usr/local/cargo/bin/blog /blog/blog
 
 # No CMD or ENTRYPOINT, see fly.toml with `cmd` override.
