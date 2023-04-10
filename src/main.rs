@@ -13,7 +13,7 @@ enum Content {
 fn get_content(req: Vec<String>) -> Result<Content, Error> {
     let req_parts: Vec<&str> = req[0].split(" ").collect();
 
-    println!("{:?}", req_parts);
+    println!("REQ_PARTS >>> {:?}", req_parts);
 
     // Only allow GET requests
     if req_parts[0] != "GET" {
@@ -77,18 +77,18 @@ fn get_content(req: Vec<String>) -> Result<Content, Error> {
     Ok(content)
 }
 
-// fn handle_connection(mut stream: TcpStream) {
-//     let buf_reader = BufReader::new(&mut stream);
-//     let http_request: Vec<_> = buf_reader
-//         .lines()
-//         .map(|result| result.unwrap())
-//         .take_while(|line| !line.is_empty())
-//         .collect();
+fn handle_error(mut stream: &TcpStream) {
+    let buf_reader = BufReader::new(&mut stream);
+    let http_request: Vec<_> = buf_reader
+        .lines()
+        .map(|result| result.unwrap())
+        .take_while(|line| !line.is_empty())
+        .collect();
 
-//     let response = "HTTP/1.1 200 OK\r\n\r\n";
+    let response = "HTTP/1.1 200 OK\r\n\r\n";
 
-//     stream.write_all(response.as_bytes()).unwrap();
-// }
+    stream.write_all(response.as_bytes()).unwrap();
+}
 
 fn handle_connection(mut stream: TcpStream) {
     let buf_reader = BufReader::new(&mut stream);
@@ -97,6 +97,13 @@ fn handle_connection(mut stream: TcpStream) {
         .map(|result| result.unwrap())
         .take_while(|line| !line.is_empty())
         .collect();
+
+    println!("HTTP REQUEST >>> {:?}", http_request);
+
+    match http_request.len() {
+        0 => handle_error(&stream),
+        _ => (),
+    }
 
     let content = get_content(http_request);
 
