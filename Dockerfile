@@ -28,7 +28,7 @@ USER app
 WORKDIR /app
 
 # Copy the content folder alongside the bin folder
-COPY /usr/src/app/content /app/content
+COPY ./content /app/content
 
 # Get compiled binaries from builder's cargo install directory
 COPY --from=builder /usr/local/cargo/bin/blog /app/blog
