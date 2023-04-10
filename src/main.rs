@@ -13,8 +13,6 @@ enum Content {
 fn get_content(req: Vec<String>) -> Result<Content, Error> {
     let req_parts: Vec<&str> = req[0].split(" ").collect();
 
-    println!("REQ_PARTS >>> {:?}", req_parts);
-
     // Only allow GET requests
     if req_parts[0] != "GET" {
         return Err(Error);
@@ -97,8 +95,6 @@ fn handle_connection(mut stream: TcpStream) {
         .map(|result| result.unwrap())
         .take_while(|line| !line.is_empty())
         .collect();
-
-    println!("HTTP REQUEST >>> {:?}", http_request);
 
     if http_request.len() == 0 {
         return handle_error(&stream);
