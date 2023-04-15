@@ -18,14 +18,14 @@ fn get_content(req: Vec<String>) -> Result<Content, Error> {
         return Err(Error);
     }
 
-    let base = String::from("content");
-    let path = req_parts[1];
-    let file = format!("{}{}", base, path);
+    let base_path = String::from("content");
+    let file_path = req_parts[1];
+    let full_path = format!("{}{}", base_path, file_path);
 
-    let content = match path {
+    let content = match file_path {
         "/favicon.ico" => {
-            let f = File::open(file).unwrap();
-            let mut reader = BufReader::new(f);
+            let file = File::open(full_path).unwrap();
+            let mut reader = BufReader::new(file);
             let mut buffer = Vec::new();
 
             match reader.read_to_end(&mut buffer) {
@@ -41,7 +41,7 @@ fn get_content(req: Vec<String>) -> Result<Content, Error> {
             Content::Favicon(headers, buffer)
         }
         "/" => {
-            let content = fs::read_to_string(format!("{}index.html", file));
+            let content = fs::read_to_string(format!("{}index.html", full_path));
 
             match content {
                 Ok(result) => {
@@ -56,7 +56,7 @@ fn get_content(req: Vec<String>) -> Result<Content, Error> {
             }
         }
         _ => {
-            let content = fs::read_to_string(format!("{}.{}", file, "html"));
+            let content = fs::read_to_string(format!("{}.{}", full_path, "html"));
 
             match content {
                 Ok(result) => {
