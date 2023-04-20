@@ -1,6 +1,4 @@
 use std::{
-    borrow::BorrowMut,
-    env::var,
     fmt::Error,
     fs::{self, File},
     io::{prelude::*, BufReader},
@@ -184,8 +182,6 @@ fn handle_connection(mut stream: TcpStream) {
 }
 
 fn main() {
-    println!("ENVS {:?}", var("TEST"));
-
     let addrs = [SocketAddr::from(([0, 0, 0, 0, 0, 0, 0, 0], 8080))];
 
     let listener = TcpListener::bind(&addrs[..]).unwrap();
