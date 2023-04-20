@@ -101,7 +101,7 @@ fn get_content(req: Vec<String>) -> Result<Content, Error> {
             }
         }
         "txt" => {
-            let sitemap = get_dir_content(base_path);
+            let sitemap = get_dir_content(base_path.clone());
             let sitemap = sitemap.into_iter().filter(|f| {
                 if f.contains("html") {
                     return true;
@@ -113,11 +113,10 @@ fn get_content(req: Vec<String>) -> Result<Content, Error> {
             let content = sitemap
                 .collect::<Vec<String>>()
                 .join("\r\n")
-                .clone()
-                .replace("content/", "");
+                .replace("content/", "https://joaoalberto.dev/");
 
             let headers = format!(
-                "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: {}\r\n\r\n",
+                "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {}\r\n\r\n",
                 content.len()
             );
 
@@ -175,7 +174,7 @@ fn handle_connection(mut stream: TcpStream) {
             stream.flush().unwrap();
         }
         Err(_) => {
-            let response = "HTTP/1.1 404 NOT FOUND\r\n\r\n";
+            let response = "HTTP/1.1 404 NOT FOUND\n\r\n\r";
             stream.write_all(response.as_bytes()).unwrap();
         }
     }
